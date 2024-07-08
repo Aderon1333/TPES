@@ -21,7 +21,7 @@ func GzipMiddleware() gin.HandlerFunc {
 
 			gzipReader, err := gzip.NewReader(bytes.NewReader(body))
 			if err != nil {
-				c.String(http.StatusInternalServerError, "Error creating gzip reader")
+				c.String(http.StatusInternalServerError, err.Error())
 				c.Abort()
 				return
 			}

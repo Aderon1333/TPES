@@ -11,6 +11,7 @@ import (
 type Config struct {
 	App     AppConfig     `yaml:"app"`
 	Storage StorageConfig `yaml:"storage"`
+	Mongo   MongoConfig   `yaml:"mongo"`
 }
 
 type AppConfig struct {
@@ -25,6 +26,10 @@ type StorageConfig struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Attempts string `json:"attempts"`
+}
+
+type MongoConfig struct {
+	Url string `json:"url"`
 }
 
 var once sync.Once

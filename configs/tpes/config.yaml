@@ -8,3 +8,5 @@ storage:
   username: postgres
   password: 12345
   attempts: 5
+mongo:
+  url: "mongodb://mongo:27017/?ssl=false"

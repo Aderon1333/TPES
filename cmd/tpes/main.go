@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/Aderon1333/TPES/internal/config"
-	"github.com/Aderon1333/TPES/internal/repository/db"
+	"github.com/Aderon1333/TPES/internal/repository/mdb"
 	"github.com/Aderon1333/TPES/internal/service/manager"
 	"github.com/Aderon1333/TPES/internal/transport/rest"
 	"github.com/Aderon1333/TPES/internal/transport/rest/handlers"
-	"github.com/Aderon1333/TPES/pkg/repository/postgresql"
+	"github.com/Aderon1333/TPES/pkg/repository/mongodb"
 	"github.com/Aderon1333/TPES/pkg/utils/logfacade"
 )
 
@@ -27,21 +27,35 @@ func main() {
 	cfg := config.GetConfig(logger)
 
 	// Подключение postgresql
-	postgreSQLClient, err := postgresql.NewClient(context.TODO(), cfg.Storage, logger)
+	// postgreSQLClient, err := postgresql.NewClient(context.TODO(), cfg.Storage, logger)
+	// if err != nil {
+	// 	logger.Error(err)
+	// }
+
+	// Подключение mongodb
+	mongoClient, err := mongodb.NewMongoClient(context.TODO(), cfg.Mongo, logger)
 	if err != nil {
 		logger.Error(err)
 	}
 
-	repository := db.NewRepository(postgreSQLClient)
+	urlDAO := mdb.NewUrlDAO(context.TODO(), mongoClient)
 
-	manager := manager.NewTaskManagerDB(repository) // сервис
-	handler := handlers.NewTaskHandler(manager)     // htpp handler
+	// repository := db.NewRepository(postgreSQLClient)
+	mongoRepository := mdb.NewRepository(urlDAO)
+
+	// pgManager := manager.NewTaskManagerDB(repository) // сервис
+	// сервис инициализированный mongo(подвел монго под такой же интерфейс в менеджере)
+	mongoManager := manager.NewTaskManagerDB(mongoRepository)
+
+	// как быть с хендлером в этом случае?
+	handler := handlers.NewTaskHandler(mongoManager) // htpp handler
 
 	// Создание сервера
 	restHttpServer := rest.Server{}
 
 	// Запуск сервера
-	err = restHttpServer.RunHTTPServer(cfg.App.IP, cfg.App.Port, handler.InitRoutes(logger)) // заменил handler на свой
+	err = restHttpServer.RunHTTPServer(cfg.App.IP, cfg.App.Port, handler.InitRoutes(logger))
+	//err = restHttpServer.RunHTTPServer(cfg.App.IP, cfg.App.Port, handler.InitRoutes(logger))
 	if err != nil {
 		logger.Error(err)
 	}
@@ -54,6 +68,11 @@ func main() {
 
 	// Закрытие сервера
 	// Создание контекста для закрытия сервера
+	err = mongodb.DisconnectMongoClient(context.TODO(), mongoClient)
+	if err != nil {
+		logger.Error(err)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

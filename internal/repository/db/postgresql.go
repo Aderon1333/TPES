@@ -23,6 +23,12 @@ func formatQuery(q string) string {
 	return strings.ReplaceAll(strings.ReplaceAll(q, "\t", ""), "\n", " ")
 }
 
+func NewRepository(client postgresql.Client) manager.TaskRepositoryInterfaceDB {
+	return &repo{
+		client: client,
+	}
+}
+
 func (r *repo) Create(ctx context.Context, task *core.Task, logger *logfacade.LogFacade) error {
 	q := `
 		INSERT INTO tasks 
@@ -59,10 +65,4 @@ func (r *repo) FindOne(ctx context.Context, id int, logger *logfacade.LogFacade)
 	}
 
 	return &task, nil
-}
-
-func NewRepository(client postgresql.Client) manager.TaskRepositoryInterfaceDB {
-	return &repo{
-		client: client,
-	}
 }

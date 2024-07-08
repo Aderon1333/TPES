@@ -9,6 +9,7 @@ import (
 )
 
 type Handler struct {
+	// l Logger
 	tm TaskManagerInterfaceDB
 }
 

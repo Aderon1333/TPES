@@ -27,6 +27,7 @@ docker-local: ## build local image
 	docker image build . -t $(PROJECT_NAME) -f ./docker/Dockerfile
 
 ## в чем смысл таких локальных образов бд, если каждый раз удаляются таблицы в базе?
+## нужно просто прилинковать локальную папку
 .PHONY: docker-postgres-start 
 docker-postgres-start: ## start the postgres container
 	docker run --rm --name postgres	-e POSTGRES_PASSWORD=12345 -e POSTGRES_DB=postgres -d -p 5432:5432 postgres
