@@ -17,6 +17,8 @@ func NewMongoClient(ctx context.Context, sc config.MongoConfig, logger *logfacad
 		return nil, err
 	}
 
+	logger.Info("Connected to MongoDB")
+
 	return client, nil
 }
 

@@ -1,6 +1,7 @@
 package logfacade
 
 import (
+	"io"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -11,6 +12,7 @@ type Logger interface {
 	Info(args ...interface{})
 	Error(args ...interface{})
 	Fatal(args ...interface{})
+	Trace(args ...interface{})
 }
 
 // LogFacade фасад для логирования
@@ -35,6 +37,10 @@ func (l *LogFacade) Fatal(args ...interface{}) {
 	l.logger.Fatal(args...)
 }
 
+func (l *LogFacade) Trace(args ...interface{}) {
+	l.logger.Trace(args...)
+}
+
 // Структуры для конкретных логгеров
 type LogrusLogger struct {
 	logger *logrus.Logger
@@ -52,11 +58,15 @@ func (ll *LogrusLogger) Fatal(args ...interface{}) {
 	ll.logger.Fatal(args...)
 }
 
+func (ll *LogrusLogger) Trace(args ...interface{}) {
+	ll.logger.Fatal(args...)
+}
+
 // Logrus
-func NewLogrusLogger() *LogrusLogger {
+func NewLogrusLogger(logFile *os.File) *LogrusLogger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
 	logger.SetLevel(logrus.InfoLevel)
-	logger.SetOutput(os.Stdout)
+	logger.SetOutput(io.MultiWriter(logFile, os.Stdout))
 	return &LogrusLogger{logger: logger}
 }

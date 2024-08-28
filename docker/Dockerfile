@@ -20,4 +20,5 @@ RUN go build -o /app/bin/tpes
 EXPOSE 8080
 
 # Команда для запуска приложения
-ENTRYPOINT ["/app/bin/tpes"]
+ENTRYPOINT ["/app/bin/tpes", "/app/configs/tpes/config.yaml"]
+# ENTRYPOINT ["/app/bin/tpes"]

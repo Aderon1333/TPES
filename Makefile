@@ -14,31 +14,25 @@ build:
 clean:
 	rm -f $(BINARY_NAME)
 
-.PHONY: docker-compose-up
-docker-compose-up:
-	docker compose -f $(DOCKER_DIR)/docker-compose.yml -p $(PROJECT_NAME) up --build
+.PHONY: dc-up-pg
+dc-up-pg:
+	docker compose -f $(DOCKER_DIR)/docker-compose-pg.yml -p $(PROJECT_NAME) up --build
 
-.PHONY: docker-compose-down
-docker-compose-down:
-	docker compose -f $(DOCKER_DIR)/docker-compose.yml -p $(PROJECT_NAME) down
+.PHONY: dc-up-mg
+dc-up-mg:
+	docker compose -f $(DOCKER_DIR)/docker-compose-mg.yml -p $(PROJECT_NAME) up --build	
+
+.PHONY: dc-down-pg
+dc-down-pg:
+	docker compose -f $(DOCKER_DIR)/docker-compose-pg.yml -p $(PROJECT_NAME) down
+
+.PHONY: dc-down-mg
+dc-down-mg:
+	docker compose -f $(DOCKER_DIR)/docker-compose-mg.yml -p $(PROJECT_NAME) down
 
 .PHONY: docker-build-local-image
 docker-local: ## build local image
 	docker image build . -t $(PROJECT_NAME) -f ./docker/Dockerfile
-
-## в чем смысл таких локальных образов бд, если каждый раз удаляются таблицы в базе?
-## нужно просто прилинковать локальную папку
-.PHONY: docker-postgres-start 
-docker-postgres-start: ## start the postgres container
-	docker run --rm --name postgres	-e POSTGRES_PASSWORD=12345 -e POSTGRES_DB=postgres -d -p 5432:5432 postgres
-
-.PHONY: docker-postgres-stop
-docker-postgres-stop: ## stop the postgres container
-	docker stop postgres
-
-.PHONY: docker-tpes-start
-docker-tpes-start: ## start the app from container
-	docker run --name my-container tpes-app
 
 .PHONY: lint
 lint:
@@ -47,3 +41,7 @@ lint:
 .PHONY: lint-fast
 lint-fast:
 	golangci-lint run ./... --fast --verbose --config=.golangci.yml
+
+.PHONY: generate-structs
+generate-structs:
+	protoc -I ./internal/api/grpc/proto --go_out=./internal/api/grpc/gen/go/ --go_opt=paths=source_relative ./internal/api/grpc/proto/tpes/task_handler.proto --go-grpc_out=./internal/api/grpc/gen/go/ --go-grpc_opt=paths=source_relative

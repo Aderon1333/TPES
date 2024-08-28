@@ -1,0 +1,33 @@
+// proto/tpes/tpes.proto
+
+// Версия ProtoBuf
+syntax = "proto3";
+
+// Текущий пакет - указывает пространство имен для сервиса и сообщений. Помогает избегать конфликтов имен.
+package grpc.task.handler;
+
+// Настройки для генерации Go кода.
+option go_package = "github.com/Aderon1333/TPES/internal/api/grpc/proto/tpes";
+
+service TaskHandler {
+    rpc GetTask(GetTaskRequest) returns (TaskResponse) {}
+    rpc PutTask(PutTaskRequest) returns (TaskResponse) {}
+}
+
+message GetTaskRequest {
+    int64 id = 1;
+}
+
+message TaskResponse {
+    Task task = 1;
+}
+
+message PutTaskRequest {
+    Task task = 1;
+}
+
+message Task {
+    int64 Id = 1;
+    string Status = 2;
+    string Item = 3;
+}
